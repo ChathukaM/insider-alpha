@@ -190,13 +190,13 @@ Python, pandas, NumPy, yfinance, statsmodels, matplotlib, SEC EDGAR API
 ## How to Run
 
 ```bash
-git clone https://github.com/yourusername/insider-alpha.git
+git clone https://github.com/ChathukaM/insider-alpha.git
 cd insider-alpha
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Create .env file with SEC_USER_AGENT="YourName your@email.com"
+# Create .env file with SEC_USER_AGENT="YourEmail@email.com"
 
 python src/bulk_downloader.py    # Download SEC data
 python src/filing_parser.py      # Parse and join tables
