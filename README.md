@@ -34,12 +34,36 @@ This finding is consistent with recent research indicating that insider trading 
 5. **Backtesting** — Simulated trades entering at next-day open after the filing date, holding for 60 trading days, benchmarked against Russell 2000
 6. **Factor Analysis** — Ran Fama-French 5-factor regression to decompose returns into factor exposures and residual alpha
 
+#### Conviction Metric
+
+The relative position increase for each insider purchase is computed as:
+
+$$\text{Relative Increase}_i = \frac{S_i^{\text{bought}}}{S_i^{\text{post}} - S_i^{\text{bought}}}$$
+
+where $S_i^{\text{bought}}$ is the number of shares purchased and $S_i^{\text{post}}$ is the total shares held after the transaction. A higher value indicates stronger personal conviction.
+
 ### Backtest Rules
 - **Entry**: Opening price on the first trading day after the Form 4 filing date (no look-ahead bias — uses filing date, not transaction date)
 - **Exit**: Closing price 60 trading days after entry
 - **Benchmark**: Russell 2000 over the identical holding period (selected to match the small/mid-cap profile of the traded universe)
 - **Position sizing**: Equal-weighted, trades can overlap, no capital constraints modelled
 - **No shorting**: Long-only strategy
+
+### Return Calculations
+
+For each signal, the trade return and abnormal return are computed as:
+
+$$r_{\text{trade}} = \frac{P_{\text{exit}} - P_{\text{entry}}}{P_{\text{entry}}}$$
+
+$$r_{\text{abnormal}} = r_{\text{trade}} - r_{\text{benchmark}}$$
+
+where $P_{\text{entry}}$ is the opening price on the first trading day after the filing date, $P_{\text{exit}}$ is the closing price 60 trading days later, and $r_{\text{benchmark}}$ is the Russell 2000 return over the identical period.
+
+The annualised Sharpe ratio is:
+
+$$\text{Sharpe} = \frac{\bar{r}}{\sigma_r} \times \sqrt{\frac{252}{H}}$$
+
+where $\bar{r}$ is the mean trade return, $\sigma_r$ is the standard deviation, and $H = 60$ is the holding period in trading days.
 
 ## Results
 
@@ -67,7 +91,13 @@ Despite positive abnormal returns against the Russell 2000 benchmark, the Sharpe
 | RMW | 0.3468 | 1.27 | 0.204 |
 | CMA | -0.1141 | -0.40 | 0.686 |
 
-R-squared: 0.273. The strategy's returns are primarily explained by market beta and small-cap exposure. No statistically significant alpha remains after factor adjustment.
+The factor-adjusted returns are estimated via OLS regression:
+
+$$r_i - r_f = \alpha + \beta_1 (r_m - r_f) + \beta_2 \cdot \text{SMB} + \beta_3 \cdot \text{HML} + \beta_4 \cdot \text{RMW} + \beta_5 \cdot \text{CMA} + \epsilon_i$$
+
+where $r_i$ is the trade return, $r_f$ is the risk-free rate, and the five factors capture market ($r_m - r_f$), size (SMB), value (HML), profitability (RMW), and investment (CMA) exposures. The intercept $\alpha$ represents return unexplained by factor exposures.
+
+R-squared: 0.273. The strategy's returns are primarily explained by market beta and small-cap exposure. No statistically significant alpha remains after factor adjustment ($\alpha = 0.08\%$, $t = 0.08$).
 
 ### Holding Period Sensitivity
 
